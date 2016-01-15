@@ -25,10 +25,12 @@ pylint:
     max-line-length: 100
   disable:
     - logging-format-interpolation
+    - logging-not-lazy
     - too-many-arguments
+    - missing-docstring
 
 mccabe:
   run: false
 
 pep257:
-  run: true
+  run: false
