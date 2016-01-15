@@ -29,14 +29,15 @@ class BaseBuilder(object):
     _force = False
     # old_artifact_path = ..
 
-    def __init__(self, build_env, force=False):
+    def __init__(self, build_env, python_env, force=False):
         self.build_env = build_env
+        self.python_env = python_env
         self.version = build_env.version
         self.project = build_env.project
         self._force = force
         self.target = self.project.artifact_path(
             version=self.version.slug,
-            type=self.type
+            type_=self.type
         )
 
     def force(self, **kwargs):
@@ -98,8 +99,7 @@ class BaseBuilder(object):
         if not os.path.exists(index_filename):
             readme_filename = os.path.join(docs_dir, 'README.{ext}'.format(ext=extension))
             if os.path.exists(readme_filename):
-                os.system('mv {readme} {index}'.format(index=index_filename,
-                                                       readme=readme_filename))
+                return 'README'
             else:
                 index_file = open(index_filename, 'w+')
                 index_text = """
@@ -116,6 +116,7 @@ If you want to use another markup, choose a different builder in your settings.
 
                 index_file.write(index_text.format(dir=docs_dir, ext=extension))
                 index_file.close()
+        return 'index'
 
     def run(self, *args, **kwargs):
         '''Proxy run to build environment'''

@@ -1,6 +1,7 @@
 from django.conf.urls import url, patterns, include
 from django.contrib import admin
 from django.conf import settings
+from django.conf.urls.static import static
 from django.views.generic.base import TemplateView
 
 from tastypie.api import Api
@@ -50,9 +51,13 @@ api_urls = patterns(
     url(r'^websupport/', include('readthedocs.comments.urls')),
 )
 
-django_urls = patterns(
+i18n_urls = patterns(
     '',
     url(r'^i18n/', include('django.conf.urls.i18n')),
+)
+
+admin_urls = patterns(
+    '',
     url(r'^admin/', include(admin.site.urls)),
 )
 
@@ -62,20 +67,22 @@ money_urls = patterns(
     url(r'^accounts/gold/', include('readthedocs.gold.urls')),
 )
 
-urlpatterns += docs_urls
+if not getattr(settings, 'USE_SUBDOMAIN', False):
+    urlpatterns += docs_urls
+
 urlpatterns += rtd_urls
 urlpatterns += api_urls
 urlpatterns += core_urls
-urlpatterns += django_urls
+urlpatterns += i18n_urls
 urlpatterns += money_urls
 urlpatterns += deprecated_urls
+
+if getattr(settings, 'ALLOW_ADMIN', True):
+    urlpatterns += admin_urls
 
 if settings.DEBUG:
     urlpatterns += patterns(
         '',  # base view, flake8 complains if it is on the previous line.
         url('style-catalog/$',
             TemplateView.as_view(template_name='style_catalog.html')),
-        url(regex='^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'),
-            view='django.views.static.serve',
-            kwargs={'document_root': settings.MEDIA_ROOT}),
-    )
+    ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
